@@ -1,23 +1,29 @@
 import {Building21Nav} from "./building-21-nav";
-import React from "react";
+import React, {useContext, useEffect, useState} from "react";
 import {Disclosure} from '@headlessui/react'
 import {Bars3Icon, XMarkIcon} from '@heroicons/react/24/outline'
 import Image from "next/image"
 import Link from "next/link"
 import {useRouter} from 'next/router'
+import {LootContext} from "../contexts/loot-list";
 
 const navigation = [
   {name: 'Gear', href: '/', external: false, priority: false},
   {name: 'Keys', href: '/keys', external: false, priority: true},
   {name: 'Stash', href: '/stash', external: false, priority: false},
-  {name: 'Current Objectives', href: '/objectives', external: false, priority: true},
 ]
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ')
 }
 
-function NavItem({href, external, name}: { href: string, external: boolean, name: string }) {
+function NavItem({href, external, name, currentObjectivesCount, displayCount}: {
+  href: string,
+  external: boolean,
+  name: string,
+  currentObjectivesCount?: number
+  displayCount?: boolean
+}) {
   const isActive = useRouter().pathname === href
 
   if (external) {
@@ -51,11 +57,26 @@ function NavItem({href, external, name}: { href: string, external: boolean, name
       )}
     >
       {name}
+      {displayCount && currentObjectivesCount !== 0 &&
+        <span className="ml-2 text-sm font-medium text-gray-400">({currentObjectivesCount})</span>}
+      {displayCount && !currentObjectivesCount &&
+        <span className="ml-2 text-sm font-medium text-gray-400">(0)</span>}
     </Link>
   )
 }
 
 export const Header = () => {
+  const loot = useContext(LootContext);
+
+  const [itemCount, setItemCount] = useState(0);
+
+  useEffect(() => {
+    let total = 0;
+    total += loot.items.length;
+    total += loot.keys.length;
+    total += loot.stash.length;
+    setItemCount(total);
+  }, [loot.items, loot.keys, loot.stash]);
   return (
     <Disclosure as="nav" className="bg-black border-b border-gray-700">
       {({open}) => (
@@ -79,6 +100,8 @@ export const Header = () => {
                   <div className="ml-10 flex items-baseline space-x-4">
                     {navigation.map((item) => <NavItem key={item.href} href={item.href} external={item.external}
                                                        name={item.name} />)}
+                    <NavItem href="/objectives" external={false} name="Current Objectives"
+                             displayCount currentObjectivesCount={itemCount} />
                   </div>
                 </div>
               </div>
