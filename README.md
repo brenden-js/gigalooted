@@ -12,7 +12,6 @@
   </p>
 </div>
 
-<!-- BUILT WITH NEXTJS -->
 ## Built with NextJS
 
 This project is set up as a monorepo for a NextJS web application and an Expo app for exporting to both iOS and Android mobile applications (work in progress).
